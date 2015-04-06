@@ -2,8 +2,8 @@
 这是一个仿照MIUI的页面指示器，配合ViewPager使用，视觉效果很不错。
 
 #效果图：
-![icon](https://github.com/wangjia55/MiUIIndicator/blob/master/screen_shot1.png)</br>
 ![icon](https://github.com/wangjia55/MiUIIndicator/blob/master/screen_shot1.png)
+![icon](https://github.com/wangjia55/MiUIIndicator/blob/master/screen_shot2.png)
 
 #使用方法也非常简单
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager());

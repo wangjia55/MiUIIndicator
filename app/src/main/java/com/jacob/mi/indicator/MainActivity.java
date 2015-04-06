@@ -20,7 +20,8 @@ public class MainActivity extends FragmentActivity{
     private ViewPager mViewPager;
     private PagerAdapter mPagerAdapter;
     private ViewPagerIndicator mViewPagerIndicator;
-    private List<String> mListTabs = Arrays.asList("短信", "收藏", "推荐","好友");
+//    private List<String> mListTabs = Arrays.asList("短信", "收藏", "推荐","好友");
+    private List<String> mListTabs = Arrays.asList("短信", "收藏", "推荐","好友","新闻","娱乐","财经","房产");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

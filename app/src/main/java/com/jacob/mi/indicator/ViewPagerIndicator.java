@@ -9,6 +9,7 @@ import android.graphics.Path;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -33,11 +34,13 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
     /**
      * 绘制提示器三角形的画笔
      */
-    private Paint mPaintTriangle= new Paint(Paint.ANTI_ALIAS_FLAG);;
+    private Paint mPaintTriangle = new Paint(Paint.ANTI_ALIAS_FLAG);
+    ;
     /**
      * 绘制三角形的路径
      */
-    private Path mPath=  new Path();;
+    private Path mPath = new Path();
+    ;
     /**
      * 三角形的宽和高
      */
@@ -47,7 +50,7 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
     /**
      * 默认三角形的宽度是一个tab宽度的1/3
      */
-    public static final float RATIO_TRIANGLE = 1f/6;
+    public static final float RATIO_TRIANGLE = 1f / 6;
 
     /**
      * 默认最大的可见的Tab的个数是4个
@@ -62,7 +65,7 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
     /**
      * 初始时三角形的偏移量
      */
-    private float mInitTranslationX ;
+    private float mInitTranslationX;
 
     /**
      * 在滑动过程中三角形的偏移量
@@ -81,11 +84,11 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
     private OnPageChangeListener mPagerChangeListener;
 
     public ViewPagerIndicator(Context context) {
-        this(context,null);
+        this(context, null);
     }
 
     public ViewPagerIndicator(Context context, AttributeSet attrs) {
-        this(context, attrs,0);
+        this(context, attrs, 0);
     }
 
     public ViewPagerIndicator(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -104,16 +107,16 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
         mPaintTriangle.setStrokeJoin(Paint.Join.ROUND);
         mPaintTriangle.setPathEffect(new CornerPathEffect(3));
 
-        mTriangleWidth =DIMENSION_TRIANGEL_WIDTH;
-        mTriangleHeight = mTriangleWidth/2;
+        mTriangleWidth = DIMENSION_TRIANGEL_WIDTH;
+        mTriangleHeight = mTriangleWidth / 2;
 
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
         canvas.save();
-        canvas.translate(mInitTranslationX+mTranslationX,getHeight()+1);
-        canvas.drawPath(mPath,mPaintTriangle);
+        canvas.translate(mInitTranslationX + mTranslationX, getHeight() + 1);
+        canvas.drawPath(mPath, mPaintTriangle);
         canvas.restore();
         super.dispatchDraw(canvas);
     }
@@ -122,9 +125,9 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        mPath.moveTo(0,0);
-        mPath.lineTo(mTriangleWidth/2,-mTriangleHeight);
-        mPath.lineTo(mTriangleWidth,0);
+        mPath.moveTo(0, 0);
+        mPath.lineTo(mTriangleWidth / 2, -mTriangleHeight);
+        mPath.lineTo(mTriangleWidth, 0);
         mPath.close();
 
         // 初始时的偏移量
@@ -135,9 +138,9 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
     /**
      * 传入ViewPager
      */
-    public void setViewPager(ViewPager viewPager,int position){
+    public void setViewPager(ViewPager viewPager, int position) {
         this.mViewPager = viewPager;
-        if (mViewPager != null){
+        if (mViewPager != null) {
             mViewPager.setOnPageChangeListener(this);
             mViewPager.setCurrentItem(position);
         }
@@ -154,20 +157,43 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
 
         // 滚动
         scroll(position, positionOffset);
-        if (mPagerChangeListener != null){
-            mPagerChangeListener.onPageScrolled(position,positionOffset,positionOffsetPixels);
+        if (mPagerChangeListener != null) {
+            mPagerChangeListener.onPageScrolled(position, positionOffset, positionOffsetPixels);
         }
     }
 
+    /**
+     * viewpager滑动过程中，也需要调整三角形的位置
+     * 以及TabLayout中的位置
+     */
     private void scroll(int position, float positionOffset) {
-        mTranslationX = getScreenWidth()/mTabVisibleCount*(position+positionOffset);
-       invalidate();
+        int tabWidth = getScreenWidth() / mTabVisibleCount;
+        mTranslationX = tabWidth * (position + positionOffset);
+//        Log.e("TAG",tabWidth+"++"+position+"++"+mTranslationX+"++"+getWidth()+"++"+getScreenWidth());
+        if ((positionOffset > 0)
+                && (position >= mTabVisibleCount - 2)
+                && (getChildCount() > mTabVisibleCount)) {
+            if (mTabVisibleCount != 1) {
+                if (position <= getChildCount() - 3) {
+                    //这里需要注意的是，position是从0开始计算的，
+                    //如果屏幕可见的是4个tab，那从第三个开始就开始需要滑动整个布局
+                    //y轴是不需要滑动的
+                    this.scrollTo(((position+1) - (mTabVisibleCount - 1)) * tabWidth
+                            + (int) (tabWidth * positionOffset), 0);
+                }
+            } else {
+                // 为count为1时 的特殊处理
+                this.scrollTo(
+                        position * tabWidth + (int) (tabWidth * positionOffset), 0);
+            }
+        }
+        invalidate();
     }
 
     @Override
     public void onPageSelected(int i) {
 
-        if (mPagerChangeListener != null){
+        if (mPagerChangeListener != null) {
             mPagerChangeListener.onPageSelected(i);
         }
         resetTextColor();
@@ -177,7 +203,7 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
     @Override
     public void onPageScrollStateChanged(int i) {
 
-        if (mPagerChangeListener != null){
+        if (mPagerChangeListener != null) {
             mPagerChangeListener.onPageScrollStateChanged(i);
         }
     }
@@ -188,7 +214,7 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
      */
     private void highLightTextColor(int position) {
         View view = getChildAt(position);
-        if (view instanceof  TextView){
+        if (view instanceof TextView) {
             ((TextView) view).setTextColor(COLOR_TEXT_HIGHLIGHTCOLOR);
         }
     }
@@ -196,11 +222,11 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
     /**
      * 重置指示器上的文字的颜色
      */
-    private void resetTextColor(){
-        int count  = getChildCount();
+    private void resetTextColor() {
+        int count = getChildCount();
         for (int i = 0; i < count; i++) {
             View view = getChildAt(i);
-            if (view instanceof  TextView){
+            if (view instanceof TextView) {
                 ((TextView) view).setTextColor(COLOR_TEXT_NORMAL);
             }
         }
@@ -211,7 +237,7 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
      * 并且根据传入的数量添加对应的TextView
      */
     public void setTabItems(List<String> listTabs) {
-        if (listTabs.size()<=0){
+        if (listTabs.size() <= 0) {
             return;
         }
         mListTabs = listTabs;
@@ -220,11 +246,11 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
         int size = listTabs.size();
         int textSize = spToPx(9);
         int width = 0;
-        if (size<=3){
-            width = getScreenWidth()/size;
+        if (size <= 3) {
+            width = getScreenWidth() / size;
             mTabVisibleCount = size;
-        }else{
-            width = getScreenWidth()/4;
+        } else {
+            width = getScreenWidth() / 4;
             mTabVisibleCount = 4;
         }
         for (int i = 0; i < size; i++) {
@@ -241,8 +267,8 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
             textView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mViewPager != null){
-                        mViewPager.setCurrentItem(position,true);
+                    if (mViewPager != null) {
+                        mViewPager.setCurrentItem(position, true);
                     }
                 }
             });
@@ -264,21 +290,23 @@ public class ViewPagerIndicator extends LinearLayout implements ViewPager.OnPage
     /**
      * 将sp转化成px
      */
-    private int spToPx(int sp){
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,sp,getResources().getDisplayMetrics());
+    private int spToPx(int sp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, getResources().getDisplayMetrics());
     }
 
 
     /**
      * 对外的接口，这里的接口和原来ViewPager的接口一致
      */
-    public interface OnPageChangeListener{
+    public interface OnPageChangeListener {
         public void onPageScrolled(int i, float v, int i2);
+
         public void onPageSelected(int i);
+
         public void onPageScrollStateChanged(int i);
     }
 
-    public void setOnPageChangeListener(OnPageChangeListener listener){
+    public void setOnPageChangeListener(OnPageChangeListener listener) {
         this.mPagerChangeListener = listener;
     }
 }

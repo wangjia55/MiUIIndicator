@@ -20,19 +20,36 @@ public class MainActivity extends FragmentActivity{
     private ViewPager mViewPager;
     private PagerAdapter mPagerAdapter;
     private ViewPagerIndicator mViewPagerIndicator;
-    private List<String> mListTabs = Arrays.asList("短信", "收藏", "推荐");
+    private List<String> mListTabs = Arrays.asList("短信", "收藏", "推荐","好友");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mViewPager = (ViewPager) findViewById(R.id.viewPager);
-        mViewPagerIndicator = (ViewPagerIndicator) findViewById(R.id.viewpager_indicator);
-        mViewPagerIndicator.setTabItems(mListTabs);
-
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mPagerAdapter);
 
+
+        mViewPagerIndicator = (ViewPagerIndicator) findViewById(R.id.viewpager_indicator);
+        mViewPagerIndicator.setTabItems(mListTabs);
+        mViewPagerIndicator.setViewPager(mViewPager,0);
+        mViewPagerIndicator.setOnPageChangeListener(new ViewPagerIndicator.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i2) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
     }
 
 
